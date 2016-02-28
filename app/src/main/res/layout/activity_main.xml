@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="sally.cardmaker.MainActivity">
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/poster"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:viewAspectRatio="1.2"
+        app:placeholderImageScaleType="fitXY"
+        app:placeholderImage="@drawable/poster" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_margin="@dimen/activity_vertical_margin">
+
+        <FrameLayout
+            android:id="@+id/gallery"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/stroke"
+            android:padding="2dp">
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/thumb"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:viewAspectRatio="0.64"
+                app:actualImageScaleType="fitCenter"
+                app:placeholderImageScaleType="fitXY"
+                app:placeholderImage="@drawable/thumb" />
+
+            <TextView
+                android:id="@+id/tip"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/tip" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/control"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:animateLayoutChanges="true"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/pitu"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/pitu"
+                android:text="@string/pitu"
+                android:onClick="onClick" />
+
+            <Button
+                android:id="@+id/poker"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:drawableLeft="@mipmap/ic_launcher"
+                android:text="@string/poker"
+                android:onClick="onClick" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
