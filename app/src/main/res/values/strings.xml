@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">Card Maker</string>
     <string name="tip">点我选图\n再点重选</string>
+    <string name="capture">先拍一张</string>
     <string name="pitu">用P图预处理</string>
     <string name="error_no_gallery">未找到系统相册</string>
+    <string name="error_no_capture">未找到系统相机</string>
     <string name="error_no_pitu">未找到天天P图</string>
     <string name="save">保存</string>
 

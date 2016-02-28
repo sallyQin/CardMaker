@@ -47,6 +47,10 @@ public class Utils {
         item.setTitle(colored);
     }
 
+    public static boolean hasCamera() {
+        return App.context().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
+    }
+
     public static boolean isEmpty(@Nullable Object object) {
         return null == object || object.toString().isEmpty();
     }
@@ -81,6 +85,28 @@ public class Utils {
         } else {
             return uri.getPath();
         }
+    }
+
+    public static Bitmap decode(@NonNull Uri uri, @NonNull View view) {
+        int viewWidth = view.getWidth();
+        int viewHeight = view.getHeight();
+
+        String path = getMediaPath(uri);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+
+        for (options.inSampleSize = 1; options.outWidth > viewWidth && options.outHeight > viewHeight; options.inSampleSize <<= 1) {
+            options.outWidth >>= 1;
+            options.outHeight >>= 1;
+
+            if (options.outWidth < viewWidth || options.outHeight < viewHeight) {
+                break;
+            }
+        }
+
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(path, options);
     }
 
     public static Bitmap decode(@NonNull String file) {

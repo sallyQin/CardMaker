@@ -1,7 +1,6 @@
 package sally.cardmaker.poker;
 
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
@@ -44,9 +43,7 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
         mSuitButton = (TextView) findViewById(R.id.suit);
         mRankButton = (TextView) findViewById(R.id.rank);
         mPokerView = (PokerView) findViewById(R.id.canvas);
-
-        Uri data = getIntent().getData();
-        mPokerView.mBitmap = Utils.decode(Utils.getMediaPath(data));
+        mPokerView.mImageUri = getIntent().getData();
 
         /** menus */
         mSuitPopup = new PopupMenu(this, mSuitButton);

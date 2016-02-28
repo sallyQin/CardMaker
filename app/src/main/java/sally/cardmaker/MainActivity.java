@@ -2,6 +2,7 @@ package sally.cardmaker;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,19 +22,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     /** static variables */
     private static final String TAG = "MainActivity";
-    private static final String IMAGE_URI = "image_uri";
+    private static final String KEY_IMAGE_URI = "image_uri";
+    private static final String KEY_CAPTURED_URI = "captured_uri";
     private static final int REQUEST_GALLERY = 1;
-    private static final int REQUEST_PITU = 2;
-    private static final int REQUEST_POKER = 3;
+    private static final int REQUEST_CAPTURE = 2;
+    private static final int REQUEST_PITU = 3;
+    private static final int REQUEST_POKER = 4;
 
     /** USER DATA -- saved member variables */
     private Uri mImageUri;
+    private Uri mCapturedUri;
 
     /** auto-initialized member variables */
     private Intent mPituIntent = new Intent(null, Uri.parse("ttpic://TTPTBEAUTIFY?back=1")).setClassName("com.tencent.ttpic", "com.tencent.ttpic.module.MainActivity");
     private View mControlGroup;
     private View mTipView;
-    private View mPituView;
+    private View mCaptureButton;
+    private View mPituButton;
     private SimpleDraweeView mThumbView;
 
     @Override
@@ -44,7 +49,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = getIntent();
         Log.d(TAG, "[onCreate] intent = " + intent);
         if (savedInstanceState != null) {
-            mImageUri = savedInstanceState.getParcelable(IMAGE_URI);
+            mImageUri = savedInstanceState.getParcelable(KEY_IMAGE_URI);
+            mCapturedUri = savedInstanceState.getParcelable(KEY_CAPTURED_URI);
         } else {
             try {
                 mImageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
@@ -59,7 +65,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mThumbView = (SimpleDraweeView) galleyGroup.findViewById(R.id.thumb);
         mTipView = galleyGroup.findViewById(R.id.tip);
         mControlGroup = findViewById(R.id.control);
-        mPituView = mControlGroup.findViewById(R.id.pitu);
+        mCaptureButton = mControlGroup.findViewById(R.id.capture);
+        mPituButton = mControlGroup.findViewById(R.id.pitu);
         if (!Utils.isEmpty(mImageUri)) {
             Log.d(TAG, "[onCreate] mImageUri = " + mImageUri);
             onPickImage();
@@ -72,7 +79,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(IMAGE_URI, mImageUri);
+        outState.putParcelable(KEY_IMAGE_URI, mImageUri);
+        outState.putParcelable(KEY_CAPTURED_URI, mCapturedUri);
     }
 
     @Override
@@ -83,6 +91,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);  /** System Gallery */
                 if (Utils.isIntentSafe(intent, R.string.error_no_gallery)) {
                     startActivityForResult(intent, REQUEST_GALLERY);
+                }
+                break;
+            case R.id.capture:
+                intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (Utils.isIntentSafe(intent, R.string.error_no_capture)) {
+                    File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+                    mCapturedUri = Uri.fromFile(new File(dir, "CM_CAPTURED_" + System.currentTimeMillis() +  ".jpg"));
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, mCapturedUri);
+                    startActivityForResult(intent, REQUEST_CAPTURE);
                 }
                 break;
             case R.id.pitu:
@@ -112,9 +129,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
 
         if (Utils.isIntentSafe(mPituIntent)) {
-            mPituView.setVisibility(View.VISIBLE);
+            mPituButton.setVisibility(View.VISIBLE);
         } else {
-            mPituView.setVisibility(View.GONE);
+            mPituButton.setVisibility(View.GONE);
         }
     }
 
@@ -123,30 +140,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "[onActivityResult] requestCode = " + requestCode + ", resultCode = " + resultCode + ", data = " + data);
 
-        if (data != null) {
-            Uri uri;
-            switch (requestCode) {
-                case REQUEST_GALLERY:
+        Uri uri = null;
+        switch (requestCode) {
+            case REQUEST_GALLERY:
+                if (data != null) {
                     uri = data.getData();
-                    if (!Utils.isEmpty(uri)) {
-                        mImageUri = uri;
-                        onPickImage();
-                    }
-                    break;
-                case REQUEST_PITU:
+                }
+                break;
+            case REQUEST_CAPTURE:
+                if (RESULT_OK == resultCode) {
+                    uri = mCapturedUri;
+                }
+                break;
+            case REQUEST_PITU:
+                if (data != null) {
                     try {
                         uri = data.getParcelableExtra(Intent.EXTRA_STREAM);
                         if (!Utils.isEmpty(uri)) {
-                            mImageUri = Uri.fromFile(new File(uri.getPath()));
-                            onPickImage();
+                            uri = Uri.fromFile(new File(uri.getPath()));
                         }
                     } catch (Exception e) {
                         // ignore
                     }
-                    break;
-                case REQUEST_POKER:
-                    break;
-            }
+                }
+                break;
+            case REQUEST_POKER:
+                break;
+        }
+
+        if (!Utils.isEmpty(uri)) {
+            mImageUri = uri;
+            onPickImage();
         }
     }
 
@@ -155,10 +179,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mTipView.setVisibility(View.GONE);
         mControlGroup.setVisibility(View.VISIBLE);
 
+        if (Utils.hasCamera()) {
+            mCaptureButton.setVisibility(View.VISIBLE);
+        }
+
         if (Utils.isIntentSafe(mPituIntent)) {
-            mPituView.setVisibility(View.VISIBLE);
+            mPituButton.setVisibility(View.VISIBLE);
         } else {
-            mPituView.setVisibility(View.GONE);
+            mPituButton.setVisibility(View.GONE);
         }
     }
 }

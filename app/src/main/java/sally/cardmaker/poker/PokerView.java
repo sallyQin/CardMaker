@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.support.v4.view.MotionEventCompat;
 import android.text.Spannable;
 import android.util.AttributeSet;
@@ -17,6 +18,7 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import sally.cardmaker.BitmapRect;
+import sally.cardmaker.Utils;
 
 class PokerView extends View {
 
@@ -27,8 +29,10 @@ class PokerView extends View {
     private static final float SCALE_X_SUIT = 1;
     private static final float SCALE_X_10 = 0.75f;
 
+    Uri mImageUri;
     Bitmap mBitmap;
     BitmapRect mBitmapRect;
+
     private Rect mWindowRect;
     private Paint mPaint;
     private ScaleGestureDetector mScaleDetector;
@@ -81,6 +85,7 @@ class PokerView extends View {
             mWindowRect.right = width - padding;
             mWindowRect.bottom = height - padding;
 
+            mBitmap = Utils.decode(mImageUri, this);
             if (null == mBitmapRect) {
                 mBitmapRect = new BitmapRect(mBitmap, mWindowRect);
             }
