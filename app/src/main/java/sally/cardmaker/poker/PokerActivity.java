@@ -22,10 +22,12 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
     private static final String KEY_SUIT = "suit";
     private static final String KEY_RANK = "rank";
     private static final String KEY_RECT = "rect";
+    private static final String KEY_CHANGED = "changed";
 
     /** USER DATA -- saved member variables */
     CharSequence mSuit;
     CharSequence mRank;
+    private boolean mChanged;
 
     /** auto-initialized member variables */
     private PokerView mPokerView;
@@ -64,14 +66,17 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
             mSuit = savedInstanceState.getCharSequence(KEY_SUIT);
             mRank = savedInstanceState.getCharSequence(KEY_RANK);
             mPokerView.mBitmapRect = savedInstanceState.getParcelable(KEY_RECT);
+
+            onUserDataChanged();
+            mChanged = savedInstanceState.getBoolean(KEY_CHANGED);
         } else {
             /** default */
             MenuItem spade = suitMenu.getItem(0);
             MenuItem ace = rankMenu.getItem(1);
             mSuit = spade.getTitle();   /** ♠ */
             mRank = ace.getTitle();     /** Ace */
+            onUserDataChanged();
         }
-        onUserDataChanged();
 
         /** listeners */
         mSuitPopup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -105,6 +110,7 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
         outState.putCharSequence(KEY_SUIT, mSuit);
         outState.putCharSequence(KEY_RANK, mRank);
         outState.putParcelable(KEY_RECT, mPokerView.mBitmapRect);
+        outState.putBoolean(KEY_CHANGED, mChanged);
     }
 
     @Override
@@ -127,7 +133,9 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Utils.compress(mPokerView);
+        if (mChanged) {
+            mChanged = !Utils.compress(mPokerView);
+        }
         return true;
     }
 
@@ -149,5 +157,6 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
         }
 
         mPokerView.invalidate();
+        mChanged = true;
     }
 }

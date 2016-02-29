@@ -150,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case REQUEST_CAPTURE:
                 if (RESULT_OK == resultCode) {
                     uri = mCapturedUri;
+                    Utils.galleryAddPic(uri);
                 }
                 break;
             case REQUEST_PITU:

@@ -47,6 +47,10 @@ public class Utils {
         item.setTitle(colored);
     }
 
+    public static void galleryAddPic(@NonNull Uri uri) {
+        App.context().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
+    }
+
     public static boolean hasCamera() {
         return App.context().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
@@ -129,21 +133,26 @@ public class Utils {
     }
 
     /** view --> bitmap --> png file */
-    public static void compress(@NonNull View view) {
+    public static boolean compress(@NonNull View view) {
         try {
             Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
             view.draw(canvas);
+
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CM_POKER_" + System.currentTimeMillis() + ".png");
             try {
-                OutputStream stream = new FileOutputStream(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "CM_" + System.currentTimeMillis() + ".png"));
+                OutputStream stream = new FileOutputStream(file);
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 bitmap.recycle();
                 close(stream);
+                galleryAddPic(Uri.fromFile(file));
+                return true;
             } catch (FileNotFoundException e) {
                 // ignore
             }
         } catch (OutOfMemoryError e) {
             // ignore
         }
+        return false;
     }
 }
