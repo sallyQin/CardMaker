@@ -1,5 +1,6 @@
 package sally.cardmaker.poker;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import sally.cardmaker.R;
 import sally.cardmaker.Utils;
@@ -133,8 +135,14 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Context application = getApplicationContext();
         if (mChanged) {
-            mChanged = !Utils.compress(mPokerView);
+            if (Utils.compress(mPokerView)) {
+                Toast.makeText(application, R.string.save_success, Toast.LENGTH_LONG).show();
+                mChanged = false;
+            } else {
+                Toast.makeText(application, R.string.save_fail, Toast.LENGTH_LONG).show();
+            }
         }
         return true;
     }
