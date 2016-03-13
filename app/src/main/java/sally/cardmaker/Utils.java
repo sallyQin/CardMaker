@@ -110,6 +110,7 @@ public class Utils {
         }
 
         options.inJustDecodeBounds = false;
+        options.inPreferQualityOverSpeed = true;
         return BitmapFactory.decodeFile(path, options);
     }
 
@@ -133,7 +134,7 @@ public class Utils {
     }
 
     /** view --> bitmap --> png file */
-    public static boolean compress(@NonNull View view) {
+    public static Uri compress(@NonNull View view) {
         try {
             Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
@@ -145,14 +146,16 @@ public class Utils {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 bitmap.recycle();
                 close(stream);
-                galleryAddPic(Uri.fromFile(file));
-                return true;
+
+                Uri uri = Uri.fromFile(file);
+                galleryAddPic(uri);
+                return uri;
             } catch (FileNotFoundException e) {
                 // ignore
             }
         } catch (OutOfMemoryError e) {
             // ignore
         }
-        return false;
+        return null;
     }
 }

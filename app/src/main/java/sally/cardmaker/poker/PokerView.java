@@ -20,7 +20,7 @@ import android.view.View;
 import sally.cardmaker.BitmapRect;
 import sally.cardmaker.Utils;
 
-class PokerView extends View {
+class PokerView extends View implements BitmapRect.OnChangeListener {
 
     @SuppressWarnings("unused")
     private static final String TAG = "PokerView";
@@ -59,6 +59,12 @@ class PokerView extends View {
     }
 
     @Override
+    public void onChange() {
+        PokerActivity activity = (PokerActivity) getContext();
+        activity.mChanged = true;
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
@@ -89,6 +95,7 @@ class PokerView extends View {
             if (null == mBitmapRect) {
                 mBitmapRect = new BitmapRect(mBitmap, mWindowRect);
             }
+            mBitmapRect.setOnChangeListener(this);
             mScaleDetector = new ScaleGestureDetector(getContext(), mBitmapRect);
         }
     }

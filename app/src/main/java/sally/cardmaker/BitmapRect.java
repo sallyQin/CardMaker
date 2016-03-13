@@ -6,6 +6,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.ScaleGestureDetector;
 
+import java.lang.ref.WeakReference;
+
 public class BitmapRect extends ScaleGestureDetector.SimpleOnScaleGestureListener implements Parcelable {
 
     @SuppressWarnings("unused")
@@ -21,7 +23,8 @@ public class BitmapRect extends ScaleGestureDetector.SimpleOnScaleGestureListene
     private float mMaxScale;
     private float mScale;
 
-    /** last touch position -- no need to save */
+    /** no need to save */
+    private WeakReference<OnChangeListener> mWeakReference;
     private float mX;
     private float mY;
 
@@ -37,6 +40,71 @@ public class BitmapRect extends ScaleGestureDetector.SimpleOnScaleGestureListene
         int left = (int) ((mBitmapWidth - mWindowWidth * mScale) / 2);
         int top = (int) ((mBitmapHeight - mWindowHeight * mScale) / 2);
         mRect = new Rect(left, top, mBitmapWidth - left, mBitmapHeight - top);
+    }
+
+    public void setOnChangeListener(OnChangeListener listener) {
+        mWeakReference = new WeakReference<>(listener);
+    }
+
+    public void updatePosition(float x, float y) {
+        mX = x;
+        mY = y;
+    }
+
+    @Override
+    public boolean onScale(ScaleGestureDetector detector) {
+        float scale = detector.getScaleFactor();
+        if (scale != 1) {
+            scale = Math.max(mMinScale, Math.min(mMaxScale, mScale / scale));
+            if (scale != mScale) {
+                float diff = scale - mScale;
+                mRect.left = (int) (mRect.left - diff * mX + 0.5f);
+                mRect.top = (int) (mRect.top - diff * mY + 0.5f);
+                mRect.right = (int) (mRect.left + scale * mWindowWidth);
+                mRect.bottom = (int) (mRect.top + scale * mWindowHeight);
+                mScale = scale;
+                checkBounds();
+                notifyChange();
+            }
+        }
+        return true;
+    }
+
+    public void onMove(float x, float y) {
+        float dx = x - mX;
+        float dy = y - mY;
+        if (dx != 0 && dy != 0) {
+            int width = mRect.width();
+            int height = mRect.height();
+            int oldLeft = mRect.left;
+            int oldTop = mRect.top;
+
+            mRect.left = (int) (mRect.left - mScale * dx + 0.5f);
+            mRect.top = (int) (mRect.top - mScale * dy + 0.5f);
+            mRect.right = mRect.left + width;
+            mRect.bottom = mRect.top + height;
+            checkBounds();
+
+            if (mRect.left != oldLeft ||  mRect.top != oldTop) {
+                notifyChange();
+            }
+        }
+    }
+
+    private void checkBounds() {
+        int width = mRect.width();
+        int height = mRect.height();
+        mRect.left = Math.max(0, Math.min(mRect.left, mBitmapWidth - width));
+        mRect.top = Math.max(0, Math.min(mRect.top, mBitmapHeight - height));
+        mRect.right = mRect.left + width;
+        mRect.bottom = mRect.top + height;
+    }
+
+    private void notifyChange() {
+        OnChangeListener listener = mWeakReference.get();
+        if (listener != null) {
+            listener.onChange();
+        }
     }
 
     protected BitmapRect(Parcel in) {
@@ -62,48 +130,6 @@ public class BitmapRect extends ScaleGestureDetector.SimpleOnScaleGestureListene
         }
     };
 
-    public void updatePosition(float x, float y) {
-        mX = x;
-        mY = y;
-    }
-
-    @Override
-    public boolean onScale(ScaleGestureDetector detector) {
-        float scale = detector.getScaleFactor();
-        if (scale != 1) {
-            scale = Math.max(mMinScale, Math.min(mMaxScale, mScale / scale));
-            if (scale != mScale) {
-                float diff = scale - mScale;
-                mRect.left = (int) (mRect.left - diff * mX + 0.5f);
-                mRect.top = (int) (mRect.top - diff * mY + 0.5f);
-                mRect.right = (int) (mRect.left + scale * mWindowWidth);
-                mRect.bottom = (int) (mRect.top + scale * mWindowHeight);
-                mScale = scale;
-                checkBounds();
-            }
-        }
-        return true;
-    }
-
-    public void onMove(float x, float y) {
-        int width = mRect.width();
-        int height = mRect.height();
-        mRect.left = (int) (mRect.left - mScale * (x - mX) + 0.5f);
-        mRect.top = (int) (mRect.top - mScale * (y - mY) + 0.5f);
-        mRect.right = mRect.left + width;
-        mRect.bottom = mRect.top + height;
-        checkBounds();
-    }
-
-    private void checkBounds() {
-        int width = mRect.width();
-        int height = mRect.height();
-        mRect.left = Math.max(0, Math.min(mRect.left, mBitmapWidth - width));
-        mRect.top = Math.max(0, Math.min(mRect.top, mBitmapHeight - height));
-        mRect.right = mRect.left + width;
-        mRect.bottom = mRect.top + height;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -119,5 +145,9 @@ public class BitmapRect extends ScaleGestureDetector.SimpleOnScaleGestureListene
         parcel.writeFloat(mMinScale);
         parcel.writeFloat(mMaxScale);
         parcel.writeFloat(mScale);
+    }
+
+    public interface OnChangeListener {
+        void onChange();
     }
 }

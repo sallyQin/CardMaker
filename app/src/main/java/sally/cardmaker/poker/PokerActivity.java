@@ -2,9 +2,12 @@ package sally.cardmaker.poker;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,6 +16,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import sally.cardmaker.CardAdapter;
 import sally.cardmaker.R;
 import sally.cardmaker.Utils;
 
@@ -29,7 +33,7 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
     /** USER DATA -- saved member variables */
     CharSequence mSuit;
     CharSequence mRank;
-    private boolean mChanged;
+    boolean mChanged;
 
     /** auto-initialized member variables */
     private PokerView mPokerView;
@@ -37,8 +41,10 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
     private TextView mRankButton;
     private PopupMenu mSuitPopup;
     private PopupMenu mRankPopup;
+    private CardAdapter mAdapter;
 
     @Override
+    @SuppressWarnings("ConstantConditions")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -48,6 +54,11 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
         mRankButton = (TextView) findViewById(R.id.rank);
         mPokerView = (PokerView) findViewById(R.id.canvas);
         mPokerView.mImageUri = getIntent().getData();
+
+        mAdapter = new CardAdapter();
+        RecyclerView cards = (RecyclerView) findViewById(R.id.cards);
+        cards.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        cards.setAdapter(mAdapter);
 
         /** menus */
         mSuitPopup = new PopupMenu(this, mSuitButton);
@@ -67,18 +78,17 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
         if (savedInstanceState != null) {
             mSuit = savedInstanceState.getCharSequence(KEY_SUIT);
             mRank = savedInstanceState.getCharSequence(KEY_RANK);
-            mPokerView.mBitmapRect = savedInstanceState.getParcelable(KEY_RECT);
-
-            onUserDataChanged();
             mChanged = savedInstanceState.getBoolean(KEY_CHANGED);
+            mPokerView.mBitmapRect = savedInstanceState.getParcelable(KEY_RECT);
         } else {
             /** default */
             MenuItem spade = suitMenu.getItem(0);
             MenuItem ace = rankMenu.getItem(1);
             mSuit = spade.getTitle();   /** ♠ */
             mRank = ace.getTitle();     /** Ace */
-            onUserDataChanged();
+            mChanged = true;
         }
+        onUserDataChanged();
 
         /** listeners */
         mSuitPopup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -87,6 +97,7 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
                 CharSequence title = item.getTitle();
                 if (mSuit != title) {
                     mSuit = title;
+                    mChanged = true;
                     onUserDataChanged();
                 }
                 return true;
@@ -99,6 +110,7 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
                 CharSequence title = item.getTitle();
                 if (mRank != title) {
                     mRank = title;
+                    mChanged = true;
                     onUserDataChanged();
                 }
                 return true;
@@ -111,8 +123,8 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
         super.onSaveInstanceState(outState);
         outState.putCharSequence(KEY_SUIT, mSuit);
         outState.putCharSequence(KEY_RANK, mRank);
-        outState.putParcelable(KEY_RECT, mPokerView.mBitmapRect);
         outState.putBoolean(KEY_CHANGED, mChanged);
+        outState.putParcelable(KEY_RECT, mPokerView.mBitmapRect);
     }
 
     @Override
@@ -135,13 +147,15 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Context application = getApplicationContext();
         if (mChanged) {
-            if (Utils.compress(mPokerView)) {
-                Toast.makeText(application, R.string.save_success, Toast.LENGTH_LONG).show();
+            Context context = getApplicationContext();
+            Uri uri = Utils.compress(mPokerView);
+            if (uri != null) {
+                Toast.makeText(context, R.string.save_success, Toast.LENGTH_LONG).show();
+                mAdapter.add(uri);
                 mChanged = false;
             } else {
-                Toast.makeText(application, R.string.save_fail, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, R.string.save_fail, Toast.LENGTH_LONG).show();
             }
         }
         return true;
@@ -165,6 +179,5 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
         }
 
         mPokerView.invalidate();
-        mChanged = true;
     }
 }
