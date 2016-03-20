@@ -4,9 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.view.ScaleGestureDetector;
-
-import java.lang.ref.WeakReference;
 
 public class BitmapRect extends ScaleGestureDetector.SimpleOnScaleGestureListener implements Parcelable {
 
@@ -24,7 +23,7 @@ public class BitmapRect extends ScaleGestureDetector.SimpleOnScaleGestureListene
     private float mScale;
 
     /** no need to save */
-    private WeakReference<OnChangeListener> mWeakReference;
+    private OnChangeListener mListener;
     private float mX;
     private float mY;
 
@@ -42,8 +41,8 @@ public class BitmapRect extends ScaleGestureDetector.SimpleOnScaleGestureListene
         mRect = new Rect(left, top, mBitmapWidth - left, mBitmapHeight - top);
     }
 
-    public void setOnChangeListener(OnChangeListener listener) {
-        mWeakReference = new WeakReference<>(listener);
+    public void setOnChangeListener(@Nullable OnChangeListener listener) {
+        mListener = listener;
     }
 
     public void updatePosition(float x, float y) {
@@ -101,9 +100,8 @@ public class BitmapRect extends ScaleGestureDetector.SimpleOnScaleGestureListene
     }
 
     private void notifyChange() {
-        OnChangeListener listener = mWeakReference.get();
-        if (listener != null) {
-            listener.onChange();
+        if (mListener != null) {
+            mListener.onChange();
         }
     }
 
