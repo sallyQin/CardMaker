@@ -16,7 +16,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import sally.cardmaker.CardAdapter;
+import sally.cardmaker.db.CardAdapter;
 import sally.cardmaker.R;
 import sally.cardmaker.Utils;
 
