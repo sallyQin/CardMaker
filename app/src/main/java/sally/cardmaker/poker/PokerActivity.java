@@ -55,7 +55,7 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
         mPokerView = (PokerView) findViewById(R.id.canvas);
         mPokerView.mImageUri = getIntent().getData();
 
-        mAdapter = new CardAdapter();
+        mAdapter = new CardAdapter(this);
         RecyclerView cards = (RecyclerView) findViewById(R.id.cards);
         cards.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         cards.setAdapter(mAdapter);

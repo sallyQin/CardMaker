@@ -2,10 +2,13 @@ package sally.cardmaker.db;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,37 +18,55 @@ import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.io.File;
 
+import sally.cardmaker.App;
 import sally.cardmaker.R;
 
-public class CardAdapter extends RecyclerView.Adapter<CardAdapter.Holder> {
+public class CardAdapter extends RecyclerView.Adapter<CardAdapter.Holder> implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private SQLiteOpenHelper mHelper;
+    private FragmentActivity mActivity;
     private Cursor mCursor;
 
-    public CardAdapter() {
-        mHelper = new CardHelper();
-        SQLiteDatabase db = mHelper.getReadableDatabase();
-        mCursor = db.query(CardHelper.TABLE_NAME, null, null, null, null, null, Card.COLUMN_TIME + " DESC");
+    public CardAdapter(FragmentActivity activity) {
+        mActivity = activity;
+        activity.getSupportLoaderManager().restartLoader(0, null, this);
     }
 
-    public void add(@NonNull Uri uri) {
-        String path = uri.getPath();
-        File file = new File(path);
+    public void add(@NonNull final Uri uri) {
+        /** background thread */
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String path = uri.getPath();
+                File file = new File(path);
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(Card.COLUMN_PATH, path);
-        contentValues.put(Card.COLUMN_TIME, file.lastModified());
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(Card.COLUMN_PATH, path);
+                contentValues.put(Card.COLUMN_TIME, file.lastModified());
 
-        SQLiteDatabase db = mHelper.getReadableDatabase();
-        db.insert(CardHelper.TABLE_NAME, null, contentValues);
+                App.context().getContentResolver().insert(CardProvider.URI, contentValues);
+            }
+        }).start();
+    }
 
-        mCursor.requery();
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(mActivity, CardProvider.URI, null, null, null, Card.COLUMN_TIME + " DESC");
+    }
+
+    @Override
+    public void onLoadFinished(Loader loader, Cursor data) {
+        mCursor = data;
         notifyDataSetChanged();
     }
 
     @Override
+    public void onLoaderReset(Loader loader) {
+
+    }
+
+    @Override
     public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        LayoutInflater inflater = LayoutInflater.from(mActivity);
         View view = inflater.inflate(R.layout.item_card, parent, false);
         return new Holder(view);
     }
