@@ -19,6 +19,7 @@ import android.widget.Toast;
 import sally.cardmaker.db.CardAdapter;
 import sally.cardmaker.R;
 import sally.cardmaker.Utils;
+import sally.cardmaker.db.CardProvider;
 
 public class PokerActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -152,7 +153,7 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
             Uri uri = Utils.compress(mPokerView);
             if (uri != null) {
                 Toast.makeText(context, R.string.save_success, Toast.LENGTH_LONG).show();
-                mAdapter.add(uri);
+                CardProvider.insert(uri);
                 mChanged = false;
             } else {
                 Toast.makeText(context, R.string.save_fail, Toast.LENGTH_LONG).show();
@@ -166,6 +167,7 @@ public class PokerActivity extends AppCompatActivity implements View.OnClickList
         if (mPokerView.mBitmap != null) {
             mPokerView.mBitmap.recycle();
         }
+        mAdapter.onLoaderReset(null);
         super.onDestroy();
     }
 

@@ -1,10 +1,8 @@
 package sally.cardmaker.db;
 
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -18,7 +16,6 @@ import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.io.File;
 
-import sally.cardmaker.App;
 import sally.cardmaker.R;
 
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.Holder> implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -31,23 +28,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.Holder> implem
         activity.getSupportLoaderManager().restartLoader(0, null, this);
     }
 
-    public void add(@NonNull final Uri uri) {
-        /** background thread */
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String path = uri.getPath();
-                File file = new File(path);
-
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(Card.COLUMN_PATH, path);
-                contentValues.put(Card.COLUMN_TIME, file.lastModified());
-
-                App.context().getContentResolver().insert(CardProvider.URI, contentValues);
-            }
-        }).start();
-    }
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(mActivity, CardProvider.URI, null, null, null, Card.COLUMN_TIME + " DESC");
@@ -55,13 +35,21 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.Holder> implem
 
     @Override
     public void onLoadFinished(Loader loader, Cursor data) {
-        mCursor = data;
+        if (mCursor != data) {
+            if (mCursor != null) {
+                mCursor.close();
+            }
+            mCursor = data;
+        }
         notifyDataSetChanged();
     }
 
     @Override
     public void onLoaderReset(Loader loader) {
-
+        if (mCursor != null) {
+            mCursor.close();
+        }
+        mCursor = null;
     }
 
     @Override

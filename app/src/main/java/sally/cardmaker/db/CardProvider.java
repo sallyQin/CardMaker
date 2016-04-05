@@ -12,6 +12,8 @@ import android.support.annotation.Nullable;
 
 import java.io.File;
 
+import sally.cardmaker.App;
+
 @SuppressWarnings("ConstantConditions")
 public class CardProvider extends ContentProvider {
 
@@ -20,6 +22,17 @@ public class CardProvider extends ContentProvider {
     static final String TABLE_NAME = "cards";
 
     private Helper mHelper;
+
+    public static void insert(@NonNull Uri data) {
+        String path = data.getPath();
+        File file = new File(path);
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Card.COLUMN_PATH, path);
+        contentValues.put(Card.COLUMN_TIME, file.lastModified());
+
+        App.context().getContentResolver().insert(CardProvider.URI, contentValues);
+    }
 
     @Override
     public boolean onCreate() {
