@@ -12,6 +12,6 @@
 ####* 6.卡牌的保存：用户制作的卡牌可以保存到相册，同时会记录到本地数据库中，随时能够查看。
 
 演示：（因为是模拟机无法做图片缩放和移动的演示和P图预处理）
-![image](https://github.com/sallyQin/DishOrder/raw/master/app/src/main/res/drawable/readme_display.gif) 
+![image](https://github.com/sallyQin/CardMaker/raw/master/app/src/main/res/drawable/readme_display.gif) 
 
-![image](https://github.com/sallyQin/DishOrder/raw/master/app/src/main/res/drawable/readme_1.png) 
+![image](https://github.com/sallyQin/CardMaker/raw/master/app/src/main/res/drawable/readme_1.png) 
