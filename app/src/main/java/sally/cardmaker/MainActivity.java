@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import sally.cardmaker.poker.PokerActivity;
 
 @SuppressWarnings("SpellCheckingInspection")
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener { //主界面
 
     /** static variables */
     private static final String TAG = "MainActivity";

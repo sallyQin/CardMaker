@@ -20,7 +20,7 @@ import android.view.View;
 import sally.cardmaker.BitmapRect;
 import sally.cardmaker.Utils;
 
-class PokerView extends View implements BitmapRect.OnChangeListener {
+class PokerView extends View implements BitmapRect.OnChangeListener { //自定义View(poker图的部分)
 
     @SuppressWarnings("unused")
     private static final String TAG = "PokerView";
