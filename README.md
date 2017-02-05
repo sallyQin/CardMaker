@@ -2,7 +2,9 @@
 
 
 
+
 ##制作成扑克牌：用户可以改变扑克牌的内容(来自原始图片)、花色和点数，并对图片做移动、缩放以及选择局部显示&保存到相册。
+
 
 
 ###此APP的几个主要功能：
@@ -16,6 +18,7 @@
 
 
 演示：（因为是模拟机无法做图片缩放和移动的演示和P图预处理）
+
 ![image](https://github.com/sallyQin/CardMaker/raw/master/app/src/main/res/drawable/readme_display1.gif) 
 
 
